@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1571855118979.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1410933291",
+    "id" : "8103514",
+    "lastKnownWriteTime" : 1571857649,
+    "last_content_update" : 1571857649298,
+    "path" : "~/Victor/Cunef/VISUALIZACION/shiny3/app.R",
+    "project_path" : "app.R",
+    "properties" : {
+        "cursorPosition" : "46,1",
+        "scrollLine" : "23"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

@@ -1,0 +1,12 @@
+"0","nba<- read_csv(""~/Victor/Cunef/Prediccion/nba.csv"")
+"
+"2","Parsed with column specification:
+cols(
+  .default = col_double(),
+  Player = [31mcol_character()[39m,
+  NBA_Country = [31mcol_character()[39m,
+  Tm = [31mcol_character()[39m
+)
+"
+"2","See spec(...) for full column specifications.
+"

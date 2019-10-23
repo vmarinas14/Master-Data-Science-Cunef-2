@@ -1,0 +1,26 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1571653630447.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "285542812",
+    "id" : "60DF2CC9",
+    "lastKnownWriteTime" : 1571781049,
+    "last_content_update" : 1571781049512,
+    "path" : "~/Victor/Cunef/VISUALIZACION/Practica1VictorMarinas/Apartado 4.R",
+    "project_path" : "Apartado 4.R",
+    "properties" : {
+        "cursorPosition" : "6,0",
+        "scrollLine" : "0",
+        "tempName" : "Untitled1"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 4,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

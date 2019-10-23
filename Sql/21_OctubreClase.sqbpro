@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="/Users/vmarinas14/Victor/Cunef/SQL/nycflights17.db" foreign_keys="1" case_sensitive_like="0" temp_store="0" wal_autocheckpoint="1000" synchronous="2"/><attached/><window><current_tab id="3"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="100"/><column_width id="3" width="5000"/><column_width id="4" width="0"/><expanded_item id="0" parent="1"/><expanded_item id="1" parent="1"/><expanded_item id="2" parent="1"/><expanded_item id="3" parent="1"/></tab_structure><tab_browse><current_table name="airlines"/><default_encoding codec=""/><browse_table_settings/></tab_browse><tab_sql><sql name="GROUP BY">--GROUP BY (columnas)
+--de todos los vuelos, filtro los q van a ORLANDO, hago un segmento por aerolinea(crear grupos), y sumas las plazas de asientos
+
+SELECT  RL.carrier, RL.name, SUM(PL.seats) AS CAPACITY
+FROM flights FL
+LEFT JOIN airlines RL ON RL.carrier = FL.carrier
+LEFT JOIN airports RP ON RP.faa = FL.dest
+LEFT JOIN planes PL ON PL.tailnum = FL.tailnum
+WHERE RP.name LIKE  &quot;%ORLANDO%&quot;
+GROUP BY RL.carrier , RL.name</sql><sql name="SQL 2">--- NUMERO DE VUELOS, Q ESTE A MAS DE 3000 PIES DE ALTITUD, AGRUPADO POR DESTINO
+
+SELECT RP.faa, RP.name, COUNT(*) AS VUELOS
+FROM flights FL
+LEFT JOIN airports RP ON RP.faa = FL.dest
+WHERE RP.alt &gt; 3000
+GROUP BY RP.faa, RP.name
+</sql><sql name="SQL 3">---RECUPERAR EL NUMERO DE DESTINOS A LOS Q VUELA ALASKA AIRLINES , OBTENER LA LISTA DE DESTINOS Y LAS PLAZAS,  ORDENADO POR LA MEDIA DECRECIENTE
+
+SELECT  RP.name, ROUND(AVG(PL.seats),2) AS MEDIA
+FROM flights FL 
+LEFT JOIN airlines RL ON RL.carrier = FL.carrier
+LEFT JOIN planes PL ON PL.tailnum = FL.tailnum
+LEFT JOIN airports RP ON RP.faa = FL.dest
+WHERE RL.name LIKE &quot;%ALASKA%&quot;
+GROUP  BY RP.name
+ORDER BY AVG (PL.seats) DESC</sql><sql name="SQL 4">---RECUPERAR AQUELLO Q LA MEDIA SUPERE 190, CON EL EJ ANTERIOR
+
+SELECT  RP.name, ROUND(AVG(PL.seats),2) AS MEDIA
+FROM flights FL 
+LEFT JOIN airlines RL ON RL.carrier = FL.carrier
+LEFT JOIN planes PL ON PL.tailnum = FL.tailnum
+LEFT JOIN airports RP ON RP.faa = FL.dest
+WHERE RL.name LIKE &quot;%ALASKA%&quot;
+GROUP  BY RP.name
+HAVING AVG(PL.seats)&gt;190.00
+ORDER BY AVG (PL.seats) DESC</sql><sql name="SQL 5">--AEROPUERTOS Q RECIBEN  AL  MENOS  DE 5 VUELOS  DE DELTA CADA DIA
+
+SELECT faa, name, MAX(VUELOS) AS MAXVUELOS
+FROM
+(SELECT RP.faa, RP.name, FL.day, FL.month, FL.year, COUNT(*)  AS VUELOS
+FROM flights FL 
+LEFT JOIN airlines RL ON RL.carrier = FL.carrier
+LEFT JOIN airports RP ON RP.faa = FL.dest
+WHERE RL.name LIKE &quot;%DELTA%&quot;
+GROUP BY  RP.faa, RP.name, FL.day, FL.month, FL.year)
+GROUP BY faa, name
+HAVING MAX(VUELOS)&lt;5
+</sql><sql name="SQL 6">-- determinar q aerolinea hay q elegir para tener el menor retraso posible, para llegar a ORLANDO
+
+SELECT RL.name, COUNT(arr_delay) AS FLSNUMBER,
+MIN(arr_delay) AS MINDELAY, AVG(arr_delay) AS AVGDELAY, MAX(arr_delay) AS MAXDELAY
+FROM flights FL
+LEFT JOIN airlines RL ON RL.carrier = FL.carrier
+LEFT JOIN airports RP ON RP.faa = FL.dest
+WHERE  RP.name  LIKE  &quot;%ORLANDO%&quot;  AND arr_delay !=&quot;NA&quot;
+GROUP BY RL.name ORDER BY AVG(arr_delay)</sql><sql name="SQL 7">--CUANDO LLEGA CON RETRADO LLEGA CON TANTO RETRASO MEDIO....
+
+SELECT RL.name, COUNT(arr_delay) AS FLSNUMBER,
+MIN(arr_delay) AS MINDELAY, AVG(arr_delay) AS AVGDELAY, MAX(arr_delay) AS MAXDELAY
+FROM flights FL
+LEFT JOIN airlines RL ON RL.carrier = FL.carrier
+LEFT JOIN airports RP ON RP.faa = FL.dest
+WHERE  RP.name  LIKE  &quot;%ORLANDO%&quot;  AND arr_delay !=&quot;NA&quot; AND arr_delay &gt; 0
+GROUP BY RL.name ORDER BY AVG(arr_delay)</sql><current_tab id="6"/></tab_sql></sqlb_project>

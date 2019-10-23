@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="/Users/vmarinas14/Downloads/nycflights17.db" foreign_keys="1" case_sensitive_like="0" temp_store="0" wal_autocheckpoint="1000" synchronous="2"/><attached/><window><current_tab id="3"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="100"/><column_width id="3" width="5000"/><column_width id="4" width="0"/><expanded_item id="0" parent="1"/><expanded_item id="1" parent="1"/><expanded_item id="2" parent="1"/><expanded_item id="3" parent="1"/></tab_structure><tab_browse><current_table name="airlines"/><default_encoding codec=""/><browse_table_settings><table schema="main" name="airlines" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk=""><sort/><column_widths/><filter_values/><display_formats/><hidden_columns/><plot_y_axes/></table></browse_table_settings></tab_browse><tab_sql><sql name="ejemplo2.sql">--SELECT * FROM airlines
+
+SELECT * FROM airports
+
+
+
+
+</sql><sql name="SQL 3">SELECT*FROM airports</sql><sql name="SQL 7">--introducir sinonimos o nombres cortos
+--cambiamos carrier por Airline y 
+--SELECT carrier AS AirLine, name AS FullName FROM airlines ALN
+
+-- salen las 10 primeras, poniendo LIMIT
+SELECT carrier AS AirLine, name AS FullName FROM airlines ALN LIMIT 10
+</sql><sql name="SQL 8">--Recupere el número de cola, el fabricante, el modelo y el número de asientos de los primeros cien aviones usando sinónimos
+
+--Enunciado:  Recover the tail number, the manufacturer, the model and the number of seats of the first hundred planes using synonyms
+
+SELECT&quot;faa&quot; AS  CODE , name ,&quot;lat&quot; AS LATITUDE, &quot;lon&quot; AS LONGITUDE, 
+&quot;alt&quot; AS ALTITUDE, &quot;tz&quot; AS TIME_ZONE, &quot;dst&quot; AS DaySavingTime, &quot;tzone&quot; AS TimeZoneName
+FROM airports LIMIT 10</sql><sql name="SQL 9">SELECT tailnum AS TailNumber, manufacturer,model,seats AS SeatsNumber
+FROM planes LIMIT 100</sql><sql name="SQL 10">SELECT tailnum AS TailNumber, manufacturer,model,seats AS SeatsNumber,
+ORDER BY  manufacturer, seats DESC
+FROM planes LIMIT 100</sql><current_tab id="5"/></tab_sql></sqlb_project>

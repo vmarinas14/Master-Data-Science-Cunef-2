@@ -1,0 +1,26 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1571847884196.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3306063954",
+    "id" : "4243FC2E",
+    "lastKnownWriteTime" : 1571849234,
+    "last_content_update" : 1571849234701,
+    "path" : "~/Victor/Cunef/VISUALIZACION/Shiny Victor Marinas/ui.R",
+    "project_path" : "ui.R",
+    "properties" : {
+        "cursorPosition" : "12,12",
+        "scrollLine" : "0",
+        "tempName" : "Untitled1"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="/Users/vmarinas14/Downloads/nycflights17.db" foreign_keys="1" case_sensitive_like="0" temp_store="0" wal_autocheckpoint="1000" synchronous="2"/><attached/><window><current_tab id="3"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="100"/><column_width id="3" width="5000"/><column_width id="4" width="0"/><expanded_item id="0" parent="1"/><expanded_item id="1" parent="1"/><expanded_item id="2" parent="1"/><expanded_item id="3" parent="1"/></tab_structure><tab_browse><current_table name="airlines"/><default_encoding codec=""/><browse_table_settings><table schema="main" name="airlines" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk=""><sort/><column_widths/><filter_values/><display_formats/><hidden_columns/><plot_y_axes/></table></browse_table_settings></tab_browse><tab_sql><sql name="14 OCT">--Comando WHERE
+-- RECOVERS ALL airports WHICH ALTITUDE IS BELLOW 3000
+
+SELECT * FROM airports WHERE alt &lt; 3000
+LIMIT 5 
+
+--EJ: CONTRAREO
+--SELECT * FROM airports WHERE alt &gt; 3000
+--LIMIT 5 
+
+
+
+</sql><sql name="14.1">--CODIGOS DE  AEROPUERTOS , DONDE EL NOMBRE INCLUYA CHICAGO
+
+--SELECT faa  FROM airports WHERE name LIKE &quot;%CHICAGO%&quot;
+
+--HAY 6 AEROPUERTOS EN LOS QUE APARECE CHICAGO COMO PALABLA
+
+--OTRO EJEMPLO: AÑADIENDO NAME A  LA TABLA
+
+SELECT name,faa  FROM airports WHERE name LIKE &quot;%CHICAGO%&quot;
+
+</sql><sql name="14.2">SELECT*FROM planes WHERE manufacturer LIKE  &quot;%AIRBUS%&quot;
+
+--SELECT  DISTINCT manufacturer
+--FROM planes LIMIT 10 
+
+--SELECT  DISTINCT manufacturer
+--FROM planes  ORDER BY manufacturer </sql><sql name="14.3">--AVIONES ENTRE 200 Y 250 PLAZAS
+
+--SELECT *  FROM planes WHERE seats BETWEEN 200 AND 250
+
+
+--SELECT *  FROM planes WHERE manufacturer == &quot;AIRBUS&quot; AND seats &lt;= 150
+
+--VUELOS A CHICAGO CON RETRASO LLEGADA (arr_delay) DE MAS DE 2 HORAS
+
+SELECT *
+FROM flights
+WHERE arr_delay &gt;=  120 AND  arr_delay != &quot;NA&quot; AND
+dest IN (SELECT faa FROM airports WHERE name  LIKE &quot;%CHICAGO%&quot;)
+
+
+--retrieve all flights to CHIGAGO airports with a departure delay longer than two hours 
+-- DISTINCT muestra los  registros unicos
+
+SELECT DISTINCT model
+FROM planes
+WHERE manufacturer LIKE &quot;%AIRBUS%&quot; AND seats &lt; 150
+ 
+
+
+ -- igual q antes, pero te cuenta cuantos hay
+SELECT model, COUNT(*)
+FROM planes
+WHERE manufacturer LIKE &quot;%AIRBUS%&quot; AND seats &lt; 150
+GROUP BY model
+
+
+---fabricantes y modelos de los aviones que vuelan a CHICAGO
+
+SELECT DISTINCT manufacturer, model FROM planes WHERE tailnum IN
+(SELECT  DISTINCT tailnum  FROM  flights
+WHERE dest IN (SELECT faa FROM  airports WHERE name LIKE  &quot;%CHICAGO%&quot; ))
+ORDER BY manufacturer, model
+
+
+</sql><sql name="COMANDOS 14 Oct">--3 casos , 
+
+SELECT 
+carrier || &quot;-&quot; || flight AS FLIGHT , dest  AS DESTINATION ,dep_time AS SCHEDULED,
+CASE
+WHEN dep_delay &lt; 0 THEN  &quot;IN ADVANCE&quot;
+WHEN dep_delay = 0 THEN  &quot;ON SCHEDULE&quot;
+WHEN dep_delay &gt; 0 THEN  &quot;DELAYED&quot;
+END 
+FROM flights
+WHERE year = 2017 	AND month=12 AND day=23
+--LIMIT 10</sql><sql name="SQL 14">--TODOS LOS AVIONES CON ASIENTOS
+--CATEFORIA  A  DE 1 A 50 --- B DE 51 -150-----, C +151
+
+SELECT *,
+CASE
+      WHEN seats &lt;=  50 THEN  &quot;A&quot;
+      WHEN seats  BETWEEN  51 AND 150 THEN  &quot;B&quot;
+      ELSE  &quot;C&quot;
+END AS CATEGORY 
+FROM planes
+--CREA UNA COLUMNA CON LA CATEGORIA</sql><sql name="fechas">-- fechas   
+
+--SELECT DATE (&quot;now&quot;)
+
+
+--SELECT DATE (&quot;now&quot;,&quot;START OF YEAR&quot;)
+
+--SELECT DATE (&quot;now&quot;,&quot;START OF MONTH&quot;)
+
+--ULTIMO DIA DEL AÑO DE 2019
+
+--SELECT DATE (&quot;now&quot;,&quot;START OF YEAR&quot;)
+
+SELECT STRFTIME(&quot;%m&quot;,DATE(&quot;now&quot;,&quot;+1 year&quot;,&quot;START OF YEAR&quot;, &quot;-1 day&quot;) )AS RESULTADO
+</sql><current_tab id="0"/></tab_sql></sqlb_project>

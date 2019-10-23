@@ -1,0 +1,26 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1571850551469.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1378453088",
+    "id" : "54E4F9CF",
+    "lastKnownWriteTime" : 1571855092,
+    "last_content_update" : 1571855092028,
+    "path" : "~/Victor/Cunef/VISUALIZACION/Shiny2/server.R",
+    "project_path" : "server.R",
+    "properties" : {
+        "cursorPosition" : "13,1",
+        "scrollLine" : "0",
+        "tempName" : "Untitled2"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

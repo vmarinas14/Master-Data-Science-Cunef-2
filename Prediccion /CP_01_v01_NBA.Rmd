@@ -1,0 +1,369 @@
+---
+title: "CP_01_v01_NBA"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Todo list
+* Read Data
+* Summarise Data
+* EDA
+* Select best regession Model
+* Estimated final model
+* Forecast final model
+* Regularization
+
+# Libraries and functions
+
+```{r Libraries and functions}
+library(here)
+library(tidyverse)
+library(skimr) # Beautiful Summarize
+library(magrittr) # Pipe operators
+library(corrplot) # Correlations
+library(ggcorrplot)  # Correlations
+library(PerformanceAnalytics) # Correlations
+library(leaps) # Model selection
+library(caret) # Cross Validation
+library(bestglm) # Cross Validation
+library(glmnet) # Regularization
+
+
+
+```
+
+
+
+# Read Data
+
+```{r Read Data}
+raw_data <-  read.csv(here("CP_NBA/data","nba.csv"))
+```
+
+
+# Summarize Data
+
+```{r Summarise Data}
+
+skim(raw_data)
+
+```
+
+* **Hay dos datos repetidos y varios NA**
+
+
+# Data Wrangling data
+
+* Data wrangling is the process of cleaning and unifying complex data sets for analysis, in turn boosting productivity within an organization.
+
+```{r Data Wranling}
+# delete duplicate
+# Remove duplicate rows of the dataframe
+raw_data %<>% distinct(Player,.keep_all= TRUE)
+
+# delete NA's
+raw_data %<>% drop_na()
+
+# Summarise
+skim(raw_data)
+
+```
+
+# EDA
+
+
+
+```{r EDA: Correlation}
+
+# Excluded vars (factor)
+vars <- c("Player","NBA_Country","Tm")
+
+
+# Correlations
+corrplot(cor(raw_data %>% 
+               select_at(vars(-vars)), 
+             use = "complete.obs"), 
+         method = "circle",type = "upper")
+
+# Other Correlations
+
+
+ggcorrplot(cor(raw_data %>% 
+               select_at(vars(-vars)), 
+            use = "complete.obs"),
+            hc.order = TRUE,
+            type = "lower",  lab = TRUE)
+
+# Other Correlations
+
+chart.Correlation(raw_data %>% 
+               select_at(vars(-vars)),
+               histogram=TRUE, pch=19)
+```
+
+
+
+## Log salary
+
+```{r Log salary}
+
+log_data <- raw_data %>% mutate(Salary=log(Salary))
+
+skim(log_data)
+
+chart.Correlation(log_data %>% 
+               select_at(vars(-vars)),
+               histogram=TRUE, pch=19)
+
+
+```
+
+
+# Model Selection
+
+```{r Regsubsets}
+
+nba <- raw_data %>% select_at(vars(-vars))
+
+
+model_select <- regsubsets(Salary~. , data =nba, method = "seqrep",nvmax=24)
+
+model_select_summary <- summary(model_select)
+
+data.frame(
+  Adj.R2 = (model_select_summary$adjr2),
+  CP = (model_select_summary$cp),
+  BIC = (model_select_summary$bic)
+)
+
+
+plot(model_select, scale = "adjr2", main = "Adjusted R^2")
+
+data.frame(
+  Adj.R2 = which.max(model_select_summary$adjr2),
+  CP = which.min(model_select_summary$cp),
+  BIC = which.min(model_select_summary$bic)
+)
+
+```
+**“All models are wrong, some models are useful”, Box, G.E.P**
+
+
+## Solution: Cross Validation
+
+http://www.sthda.com/english/articles/37-model-selection-essentials-in-r/155-best-subsets-regression-essentials-in-r/
+
+
+### Using Caret
+
+```{r Cross Validation}
+
+
+
+# get_model_formula(), allowing to access easily the formula of the models returned by the function regsubsets(). Copy and paste the following code in your R console:
+# id: model id
+# object: regsubsets object
+# data: data used to fit regsubsets
+# outcome: outcome variable
+get_model_formula <- function(id, object, outcome){
+  # get models data
+  models <- summary(object)$which[id,-1]
+  # Get model predictors
+  predictors <- names(which(models == TRUE))
+  predictors <- paste(predictors, collapse = "+")
+  # Build model formula
+  as.formula(paste0(outcome, "~", predictors))
+}
+
+
+
+# get_cv_error(), to get the cross-validation (CV) error for a given model:
+get_cv_error <- function(model.formula, data, kfold=5, setseed=1){
+  set.seed(setseed)
+  train.control <- trainControl(method = "cv",
+                                number = kfold)
+  cv <- train(model.formula, 
+              data = data, method = "lm",
+              trControl = train.control)
+  cv$results$RMSE
+}
+
+
+# Compute cross-validation error
+model.ids <- c(8,7,5)
+cv.errors <-  map(model.ids, get_model_formula,model_select , "Salary") %>%
+  map(get_cv_error, data = nba,kfold=10,setseed=12345) %>%
+  unlist()
+cv.errors
+
+# Select the model that minimize the CV error
+which.min(cv.errors)
+coef(model_select, model.ids[which.min(cv.errors)])
+# all sample
+summary(lm(get_model_formula (model.ids[which.min(cv.errors)], model_select, "Salary"),data=nba))
+```
+
+
+
+### bestglm
+
+bestglm(Xy, family = gaussian, IC = "BIC", t = "default",
+     CVArgs = "default", qLevel = 0.99, TopModels = 5,
+     method = "exhaustive", intercept = TRUE, weights = NULL,
+     nvmax = "default", RequireFullEnumerationQ = FALSE, ...)
+     
+```{r bestglm}
+
+# bestglm dataframe Xy
+nba %>% dplyr::select(-Salary,Salary) -> nba_bestglm
+
+
+# 10 kfolds
+model_bestglm <-
+    bestglm(Xy = nba_bestglm,
+            family = gaussian,
+            IC = "CV",  
+             method = "exhaustive",
+            CVArgs=list(Method="HTF", K=10, REP=1))
+
+model_bestglm$BestModel
+
+summary(model_bestglm$BestModel)
+
+# LOOCV
+
+model_bestglm2 <-
+    bestglm(Xy = nba_bestglm,
+            family = gaussian,
+            IC="LOOCV", 
+            t=10,
+             method = "exhaustive")
+
+model_bestglm2$BestModel
+
+summary(model_bestglm2$BestModel)
+
+```
+     
+
+# Regularization
+
+http://www.sthda.com/english/articles/37-model-selection-essentials-in-r/153-penalized-regression-essentials-ridge-lasso-elastic-net/
+
+Computing elastic net regession
+
+The elastic net regression can be easily computed using the caret workflow, which invokes the glmnet package.
+
+We use caret to automatically select the best tuning parameters alpha and lambda. The caret packages tests a range of possible alpha and lambda values, then selects the best values for lambda and alpha, resulting to a final model that is an elastic net model.
+
+Here, we’ll test the combination of 10 different values for alpha and lambda. This is specified using the option tuneLength.
+
+The best alpha and lambda values are those values that minimize the cross-validation error 
+
+
+
+
+
+
+```{r Regularization}
+
+# Build the model 
+set.seed(45678)
+model <- train(
+  Salary ~., data = nba, method = "glmnet",
+  trControl = trainControl("cv", number = 10),
+  tuneLength = 10
+)
+# Best tuning parameter
+model$bestTune
+
+coef(model$finalModel, model$bestTune$lambda)
+
+```
+
+### Train, Validation and Test
+
+
+
+
+```{r Train, Validation and Test}
+
+set.seed(6789)
+training.samples <- nba$Salary %>%
+  createDataPartition(p = 0.8, list = FALSE)
+train.data  <- nba[training.samples, ]
+test.data <- nba[-training.samples, ]
+
+
+
+#Using caret package
+
+#Setup a grid range of lambda values:
+lambda <- 10^seq(-3, 3, length = 100)
+#Compute ridge regression:
+# Build the model
+set.seed(45678)
+ridge <- train(
+  Salary ~., data = train.data, method = "glmnet",
+  trControl = trainControl("cv", number = 10),
+  tuneGrid = expand.grid(alpha = 0, lambda = lambda)
+  )
+# Model coefficients
+coef(ridge$finalModel, ridge$bestTune$lambda)
+# Make predictions
+predictions <- ridge %>% predict(test.data)
+# Model prediction performance
+data.frame(
+  RMSE = RMSE(predictions, test.data$Salary),
+  Rsquare = R2(predictions, test.data$Salary)
+)
+
+
+#Compute lasso regression:
+# Build the model
+set.seed(45678)
+lasso <- train(
+  Salary ~., data = train.data, method = "glmnet",
+  trControl = trainControl("cv", number = 10),
+  tuneGrid = expand.grid(alpha = 1, lambda = lambda)
+  )
+# Model coefficients
+coef(lasso$finalModel, lasso$bestTune$lambda)
+# Make predictions
+predictions <- lasso %>% predict(test.data)
+# Model prediction performance
+data.frame(
+  RMSE = RMSE(predictions, test.data$Salary),
+  Rsquare = R2(predictions, test.data$Salary)
+)
+
+#Elastic net regression:
+# Build the model
+set.seed(45678)
+elastic <- train(
+  Salary ~., data = train.data, method = "glmnet",
+  trControl = trainControl("cv", number = 10),
+  tuneLength = 10
+  )
+# Model coefficients
+coef(elastic$finalModel, elastic$bestTune$lambda)
+# Make predictions
+predictions <- elastic %>% predict(test.data)
+# Model prediction performance
+data.frame(
+  RMSE = RMSE(predictions, test.data$Salary),
+  Rsquare = R2(predictions, test.data$Salary)
+)
+#Comparing models performance:
+#The performance of the different models - ridge, lasso and elastic net - can be easily compared using caret. The best model is defined as the one that minimizes the prediction error.
+
+models <- list(ridge = ridge, lasso = lasso, elastic = elastic)
+resamples(models) %>% summary( metric = "RMSE")
+
+
+
+```
+

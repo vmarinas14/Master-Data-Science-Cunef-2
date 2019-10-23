@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="/Users/vmarinas14/Victor/Cunef/SQL/nycflights17.db" foreign_keys="1" case_sensitive_like="0" temp_store="0" wal_autocheckpoint="1000" synchronous="2"/><attached/><window><current_tab id="3"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="100"/><column_width id="3" width="5000"/><column_width id="4" width="0"/><expanded_item id="0" parent="1"/><expanded_item id="1" parent="1"/><expanded_item id="2" parent="1"/><expanded_item id="3" parent="1"/></tab_structure><tab_browse><current_table name="airlines"/><default_encoding codec=""/><browse_table_settings/></tab_browse><tab_sql><sql name="JOIN 1">---Funcion JOIN
+--SINONMIMOS FL y RP 
+
+SELECT*
+FROM flights FL
+INNER JOIN airports  RP ON  RP.faa = FL.dest
+LIMIT 20
+
+--EL CODIGO DEL AEROPUERTO  (faa) COINCIDE CON EL DESTINO (dest)
+--INNER JOIN ESTA FORZANDO  A Q TODO VUELO Q APAREZCA TIENE Q TENER EL MISMO DESTINO. Y AL REVES
+
+
+SELECT COUNT (*)
+FROM flights FL
+INNER JOIN airports  RP ON  RP.faa = FL.dest
+
+--SON 259857, CHEQUEAMOS Q SON IGUALES. Q CADA VUELO TIENE AEROPUERTO EN LA TABLA DE AEROPUERTOS
+
+SELECT COUNT (*)
+FROM flights FL
+LEFT  JOIN airports  RP ON  RP.faa = FL.dest
+LEFT
+
+----SI NO TIENE AEROPUERTO ASOCIADO, TE MUESTRA TODOS LOS VUELOS, MISMO RESULTADO Q ANTES
+
+
+--right join 
+SELECT COUNT (*)
+FROM airports RP 
+LEFT  JOIN flights  FL ON  FL.dest = RP.faa
+
+--261086  muestra todos los aeropuertos , mas los vuelos asociados a esos aeropuertos
+
+
+SELECT * FROM airports WHERE faa NOT IN 
+(SELECT  DISTINCT dest FROM flights)
+
+
+-- Comprobacion ::: aeorpuertos sin vuelos 1129</sql><sql name="SQL 2">---todos los vuelos a Orlando y la capacidad de pasajeros de sus vuelos
+
+SELECT*
+ FROM flights FL
+LEFT JOIN planes PL ON PL.tailnum = FL.tailnum
+WHERE FL.dest IN (SELECT faa FROM airports WHERE name LIKE &quot;%ORLANDO%&quot;)
+
+
+--CUAL ES LA CAPACIDAD MEDIA DE LOS VUELOS A ORLANDO
+
+SELECT*
+ FROM flights FL
+LEFT JOIN planes PL ON PL.tailnum = FL.tailnum
+WHERE FL.dest IN (SELECT faa FROM airports WHERE name LIKE &quot;%ORLANDO%&quot;)
+
+
+-- CAPACIDAD MEDIA DE LOS VUELOS A ORLANDO
+SELECT  
+avg(PL.seats) AS MAXCAPACITY
+FROM flights FL 
+LEFT JOIN planes pl on PL.tailnum = fl.tailnum
+WHERE FL.dest IN (SELECT FAA FROM airports WHERE name LIKE &quot;%ORLANDO%&quot;)
+
+--CAPACIDAD MINIMA Y MAXIMA 
+SELECT  
+min(PL.seats) AS MAXCAPACITY, max(PL.seats) AS MAXCAPACITY
+FROM flights FL 
+LEFT JOIN planes pl on PL.tailnum = fl.tailnum
+WHERE FL.dest IN (SELECT FAA FROM airports WHERE name LIKE &quot;%ORLANDO%&quot;)</sql><sql name="SQL 3">--TODOS LOS VUELOS CON EL NOMBRE DEL AEROPUERTO DE DESTINO
+
+SELECT
+FL.*
+FROM flights FL
+LEFT JOIN planes PL ON PL.tailnum = FL.tailnum
+LEFT JOIN airports RP ON RP.faa = FL.dest
+
+--la 4 fila es innecesario, pero hace q funcione mas rapido
+
+</sql><sql name="SQL 5">--recover all flights to a destination over 3,000 ft high
+--recover all flights to a destination over 3,000 ft high carried by airlines which name starts by “DELTA”
+-- FL ES UN SINONIMO DE flights, es un nombre inventado, carrier esta repetido en ambas por eso se pone RL.carrier
+
+SELECT FL.*, RP.name
+FROM flights FL
+LEFT JOIN airlines RL ON RL.carrier = FL.carrier
+LEFT JOIN airports RP ON RP.faa = FL.dest
+WHERE RL.name LIKE '%DELTA%' AND RP.alt &gt; 3000
+
+
+--OTRA MANERA: mas efectiva
+
+--SELECT*
+--FROM flights FL
+--WHERE carrier IN (SELECT carrier FROM airlines WHERE name LIKE &quot;%DELTA%&quot;)
+--AND dest IN( SELECT faa FROM airports WHERE alt &gt; 3000)</sql><current_tab id="3"/></tab_sql></sqlb_project>
